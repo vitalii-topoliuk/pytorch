@@ -711,8 +711,8 @@ def _register_dynamo_list_to_tree_spec():
         ListVariable,
         _listvariable_flatten,
         _listvariable_unflatten,
-        pytree._list_to_str,
-        pytree._maybe_str_to_list,
+        pytree._list_to_schema,
+        pytree._maybe_schema_to_list,
     )
 
     fx_pytree.register_pytree_flatten_spec(
@@ -739,8 +739,8 @@ def _register_dynamo_tuple_to_tree_spec():
         TupleVariable,
         _tuplevariable_flatten,
         _tuplevariable_unflatten,
-        pytree._tuple_to_str,
-        pytree._maybe_str_to_tuple,
+        pytree._tuple_to_schema,
+        pytree._maybe_schema_to_tuple,
     )
 
     fx_pytree.register_pytree_flatten_spec(
