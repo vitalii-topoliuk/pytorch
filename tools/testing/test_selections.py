@@ -21,7 +21,7 @@ IS_MEM_LEAK_CHECK = os.getenv("PYTORCH_TEST_CUDA_MEM_LEAK_CHECK", "0") == "1"
 # used to run tests.  If they are not equal, the only consequence should be
 # unequal shards.
 IS_ROCM = os.path.exists("/opt/rocm")
-NUM_PROCS = 1 if IS_MEM_LEAK_CHECK else 4
+NUM_PROCS = 1 if IS_MEM_LEAK_CHECK else 5
 NUM_PROCS_FOR_SHARDING_CALC = NUM_PROCS if not IS_ROCM or IS_MEM_LEAK_CHECK else 2
 THRESHOLD = 60 * 10  # 10 minutes
 
