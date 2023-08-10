@@ -1,5 +1,4 @@
 import logging
-import collections
 from collections import Counter
 import typing
 from typing import Set
