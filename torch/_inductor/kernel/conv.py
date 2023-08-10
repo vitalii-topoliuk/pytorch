@@ -1,6 +1,6 @@
 import functools
 import logging
-from typing import List
+from typing import List, Tuple, Any
 
 import torch
 from .. import config, ir
@@ -339,9 +339,9 @@ def convolution(
         # TODO maybe we can convert weights to channels last just once before
         # running the model.
         weight = ir.ExternKernel.require_channels_last(weight)
-        layout = conv_layout(x, weight, None, **kwargs)
+        layout = conv_layout(x, weight, None, **kwargs) # type: ignore[arg-type]
     else:
-        layout = conv_layout(x, weight, None, **kwargs)
+        layout = conv_layout(x, weight, None, **kwargs) # type: ignore[arg-type]
         req_stride_order = ir.get_stride_order(
             V.graph.sizevars.size_hints(layout.stride)
         )
@@ -357,7 +357,7 @@ def convolution(
         "groups",
     ]
     if bias is None:
-        args = (x, weight)
+        args: Tuple[Any, Any, Any]= (x, weight, None)
         kwargs["bias"] = None
         ordered_kwargs_for_cpp_kernel.insert(0, "bias")
     else:
