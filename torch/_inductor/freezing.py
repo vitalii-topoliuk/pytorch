@@ -2,7 +2,7 @@ import collections
 import itertools
 
 import weakref
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Dict, Counter
 
 import torch
 import torch.utils._pytree as pytree
@@ -84,8 +84,8 @@ class ConstantFolder(torch.fx.Interpreter):
         insertable_tensor_check: Optional[Callable[[torch.Tensor], bool]] = None,
     ):
         super().__init__(gm)
-        self.node_replacements = {}
-        self.replaced_uses = collections.Counter()
+        self.node_replacements: Dict[int, torch.Tensor] = {}
+        self.replaced_uses: Counter[int] = collections.Counter()
         self.unknown_value = object()
         self.skip_constructors = skip_constructors
         self.insertable_tensor_check = (
@@ -133,7 +133,7 @@ class ConstantFolder(torch.fx.Interpreter):
         out = super().run_node(node)
 
         if node.op != "get_attr" and isinstance(out, torch.Tensor):
-            if not self.insertable_tensor_check(out):
+            if not self.insertable_tensor_check(out): # type: ignore[operator]
                 return out
 
             self.node_replacements[node] = out
