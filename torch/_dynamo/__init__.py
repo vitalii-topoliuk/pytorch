@@ -1,3 +1,4 @@
+import torch
 from . import allowed_functions, convert_frame, eval_frame, resume_execution
 from .backends.registry import list_backends, register_backend
 from .convert_frame import replay
@@ -23,13 +24,7 @@ from .eval_frame import (
     reset_code,
 )
 from .external_utils import is_compiling
-from .utils import (
-    compilation_metrics,
-    graph_break_reasons,
-    guard_failures,
-    orig_code_map,
-    reset_frame_count,
-)
+from .utils import graph_break_reasons, guard_failures, orig_code_map, reset_frame_count
 
 __all__ = [
     "allow_in_graph",
@@ -70,5 +65,5 @@ def reset() -> None:
     if hasattr(eval_frame.most_recent_backend, "reset"):
         eval_frame.most_recent_backend.reset()
     eval_frame.most_recent_backend = None
-    compilation_metrics.clear()
     reset_frame_count()
+    torch._C._dynamo.compiled_autograd.clear_cache()
