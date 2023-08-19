@@ -169,7 +169,7 @@ static PyObject* profiler_end_hook = NULL;
 static PyObject* guard_profiler_name_str = NULL; /* cached py str */
 
 // Points to the extra scratch space on the code object
-static size_t extra_index = -1;
+static Py_ssize_t extra_index = -1;
 
 static Py_tss_t eval_frame_callback_key = Py_tss_NEEDS_INIT;
 
