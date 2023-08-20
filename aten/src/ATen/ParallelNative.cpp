@@ -144,7 +144,7 @@ void invoke_parallel(
   const std::function<void(int64_t, int64_t)>& f) {
   at::internal::lazy_init_num_threads();
 
-  size_t [num_tasks, chunk_size] =
+  auto [num_tasks, chunk_size] =
       internal::calc_num_tasks_and_chunk_size(begin, end, grain_size);
 
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
