@@ -486,7 +486,8 @@ void initFuncTorchBindings(PyObject* module) {
   m.def("push_dynamic_layer_stack", [](DynamicLayer layer) -> int64_t {
     return pushDynamicLayer(std::move(layer));
   });
-  py::class_<DynamicLayer>(m, "DynamicLayer"); // NOLINT
+  // NOLINTNEXTLINE(bugprone-unused-raii)
+  py::class_<DynamicLayer>(m, "DynamicLayer");
 
   py::enum_<TransformType>(m, "TransformType")
       .value("Torch", TransformType::Torch)

@@ -54,7 +54,8 @@ PyObject* THPStream_Wrap(const c10::Stream& stream) {
 
   THPStream* self = (THPStream*)ptr.get();
   self->stream_id = stream.id();
-  self->device_index = static_cast<int64_t>(stream.device_index()); // NOLINT
+  // NOLINTNEXTLINE(bugprone-signed-char-misuse)
+  self->device_index = static_cast<int64_t>(stream.device_index());
   self->device_type = static_cast<int64_t>(stream.device_type());
   return ptr.release();
   END_HANDLE_TH_ERRORS
