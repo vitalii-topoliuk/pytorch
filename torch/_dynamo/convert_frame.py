@@ -223,6 +223,15 @@ def is_recompilation(cache_size):
     return cache_size >= 1
 
 
+def compute_cache_size(cache_entry):
+    # Walk the linked list to calculate the cache size
+    running_cache_size = 0
+    while cache_entry:
+        running_cache_size += 1
+        cache_entry = cache_entry.next
+    return running_cache_size
+
+
 FRAME_COUNTER = 0
 
 
@@ -236,7 +245,7 @@ def convert_frame_assert(
     reset_graph_break_dup_checker()
 
     def _convert_frame_assert(
-        frame: types.FrameType, cache_size: int, hooks: Hooks, frame_state
+        frame: types.FrameType, cache_entry, hooks: Hooks, frame_state
     ):
         increment_frame()
         global FRAME_COUNTER
@@ -246,6 +255,7 @@ def convert_frame_assert(
 
         code = frame.f_code
 
+        cache_size = compute_cache_size(cache_entry)
         if is_recompilation(cache_size) and (
             recompiles_log.isEnabledFor(logging.DEBUG) or config.error_on_recompile
         ):
