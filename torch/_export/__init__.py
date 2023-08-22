@@ -20,7 +20,7 @@ import torch.fx._pytree as fx_pytree
 import torch.utils._pytree as pytree
 from torch._decomp import core_aten_decompositions, get_decompositions
 from torch._dispatch.python import enable_python_dispatcher
-from torch._dynamo.eval_frame import Constraint
+from torch.export import _Constraint
 from torch._dynamo.exc import UserError, UserErrorType
 from torch._dynamo.source import ConstantSource
 from torch._export.exported_program import ModuleCallEntry, ModuleCallSignature
@@ -80,7 +80,7 @@ def dynamic_dim(t: torch.Tensor, index: int):
             f" but got {index}, which is out of bounds for the given tensor."
         )
 
-    return Constraint(
+    return _Constraint(
         weakref.ref(t),
         id(t),
         index,
@@ -109,7 +109,7 @@ def capture_pre_autograd_graph(
     f: Callable,
     args: Tuple[Any],
     kwargs: Optional[Dict[str, Any]] = None,
-    constraints: Optional[List[Constraint]] = None,
+    constraints: Optional[List[_Constraint]] = None,
     decomp_table: Dict[OpOverload, Callable] = core_aten_decompositions(),
 ) -> torch.nn.Module:
     """
@@ -144,7 +144,7 @@ def export(
     f: Callable,
     args: Tuple[Any, ...],
     kwargs: Optional[Dict[str, Any]] = None,
-    constraints: Optional[List[Constraint]] = None,
+    constraints: Optional[List[_Constraint]] = None,
     *,
     preserve_module_call_signature: Tuple[str, ...] = (),
 ) -> ExportedProgram:
@@ -557,7 +557,7 @@ def aot_compile(
     f: Callable,
     args: Tuple[Any],
     kwargs: Optional[Dict[str, Any]] = None,
-    constraints: Optional[List[Constraint]] = None,
+    constraints: Optional[List[_Constraint]] = None,
     options: Optional[Dict[str, Any]] = None,
 ) -> Tuple[str, ExportedProgram]:
     """
