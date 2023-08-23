@@ -1503,6 +1503,7 @@ class FakeTensorMode(TorchDispatchMode):
                 "vision",
                 "torchtext",
                 "torchaudio",
+                "quantized",
             }
             grandfathered_ops_FIXME = {
                 "fbgemm::gmm",
