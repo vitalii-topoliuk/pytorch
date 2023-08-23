@@ -5076,6 +5076,55 @@ class TestSparseAny(TestCase):
             result = mask.to_dense().sparse_mask(mask)
             self.assertEqual(result, mask)
 
+    # TODO: @all_sparse_layouts('layout', include_strided=False)
+    @parametrize("layout", [subtest(torch.sparse_coo, name='SparseCOO'),
+                            subtest(torch.sparse_csr, name='SparseCSR')])
+    @parametrize("masked", [subtest(False, name='nonmasked'), subtest(True, name='masked')])
+    @parametrize("fast_mode", [subtest(False, name='slow'), subtest(True, name='fast')])
+    def test_as_sparse_gradcheck(self, layout, masked, fast_mode):
+        gradcheck = torch.sparse.as_sparse_gradcheck(torch.autograd.gradcheck)
+
+        def identity(x):
+            return x
+
+        if layout is torch.sparse_coo:
+            def values_mth(x):
+                # TODO: remove coalesced after gh-107097 is fixed.
+                return x.coalesce().values()
+        else:
+            values_mth = torch.Tensor.values
+
+        for func in (torch.Tensor.to_dense,
+                     torch.Tensor.sum,
+                     identity,
+                     torch.Tensor.to_sparse,
+                     values_mth,
+                     ):
+            if layout is torch.sparse_csr and func.__name__ == 'values':
+                # FIXME: RuntimeError: indices expected sparse
+                # coordinate tensor layout but got SparseCsr. Likely
+                # works when gh-107126 is fixed.
+                continue
+            for x in self.generate_simple_inputs(
+                    layout,
+                    dtype=torch.float64,
+                    # TODO: fix gh-104868  to enable batched samples:
+                    enable_batch=layout is not torch.sparse_csr,
+                    enable_hybrid=not (
+                        layout is torch.sparse_csr and (
+                            # FIXME: RuntimeError: sparse_mask(): the
+                            # number of sparse dimensions in `self`
+                            # should match that of the `mask`. Got
+                            # `self.sparse_dim() == 3` !=
+                            # `mask.sparse_dim() == 2
+                            func.__name__ == 'sum'
+                            # FIXME: RuntimeError: expected
+                            # col_indices to be a contiguous tensor
+                            # per batch
+                            or func.__name__ == 'to_sparse'
+                        ))):
+                gradcheck(func, x.requires_grad_(True), masked=masked, fast_mode=fast_mode)
+
 
 # e.g., TestSparseUnaryUfuncsCPU and TestSparseUnaryUfuncsCUDA
 instantiate_device_type_tests(TestSparseUnaryUfuncs, globals(), except_for='meta')
