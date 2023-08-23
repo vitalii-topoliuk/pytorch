@@ -1909,9 +1909,6 @@ class TritonKernel(Kernel):
         if config.benchmark_kernel:
             code.splice(self.codegen_kernel_benchmark())
 
-        if name is not None:
-            return code.getvalue()
-
         return code.getvalue()
 
     def codegen_static_numels(self, code):
@@ -2234,8 +2231,7 @@ class TritonScheduling(BaseScheduling):
 
         node_schedule = self.generate_node_schedule(nodes, numel, rnumel)
 
-        if schedule_log.isEnabledFor(logging.DEBUG):
-            schedule_log.debug("Schedule:\n %s", node_schedule)
+        schedule_log.debug("Schedule:\n %s", node_schedule)
 
         return self.codegen_node_schedule(node_schedule, numel, rnumel)
 
@@ -2349,6 +2345,26 @@ class TritonScheduling(BaseScheduling):
         if origins:
             wrapper.writeline(origins)
 
+        if config.debug_fusion:
+            from torch._inductor.scheduler import (
+                BaseSchedulerNode,
+                ForeachKernelSchedulerNode,
+            )
+
+            if not any(
+                isinstance(n, ForeachKernelSchedulerNode) for n in node_schedule
+            ):
+                # We probablly should look what are the nodes inside a foreach
+                # schedule node
+                node_ids = [
+                    n.node_idx
+                    for n in node_schedule
+                    if isinstance(n, BaseSchedulerNode)
+                ]
+                wrapper.writeline(
+                    f"{wrapper.comment} Fused node idx list: {', '.join(map(str, node_ids))}"
+                )
+
     def codegen_node_schedule(self, node_schedule, numel, reduction_numel):
         tiled_groups, reduction_hint_val, mutations, index_dtype = self.get_kernel_args(
             node_schedule, numel, reduction_numel
@@ -2398,6 +2414,7 @@ class TritonScheduling(BaseScheduling):
             return itertools.takewhile(lambda n: n is not DisableReduction, nodes)
 
         with kernel:
+            kernel.node_schedule = node_schedule
             stack = contextlib.ExitStack()
             kernel.set_last_usage(current_reduction_nodes(node_schedule))
             for node in node_schedule:
@@ -2460,6 +2477,7 @@ class TritonScheduling(BaseScheduling):
         _, (numel, rnumel) = template_node.group
         assert rnumel == 1
         kernel, render = template_node.node.make_kernel_render(template_node.node)
+        kernel.node_schedule = [template_node, *epilogue_nodes]
         with kernel:
             for node in [template_node, *epilogue_nodes]:
                 node.mark_run()
