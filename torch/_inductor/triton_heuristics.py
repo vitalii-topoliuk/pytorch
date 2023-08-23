@@ -216,7 +216,8 @@ class CachingAutotuner(KernelInterface):
                     grid_0, grid_1, grid_2 = grid(grid_meta)
                 else:
                     grid_0, grid_1, grid_2 = grid
-                bin.c_wrapper(grid_0, grid_1, grid_2, bin.num_warps, bin.shared,
+                bin.c_wrapper(grid_0, grid_1, grid_2, bin.num_warps,
+                            bin.num_ctas, *bin.clusterDims, bin.shared,
                             stream, bin.cu_function, None, None, None,
                             {', '.join(call_args)})
             """.lstrip(),
