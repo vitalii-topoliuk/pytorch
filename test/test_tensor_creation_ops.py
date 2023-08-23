@@ -2848,15 +2848,27 @@ class TestTensorCreation(TestCase):
         device_tensor = torch.arange(0, 10, dtype=dtype, device=device)
         self.assertEqual(cpu_tensor, device_tensor)
 
-    def test_arange_bfloat16(self, device):
-        ref_tensor = torch.tensor([0, 1, 2, 3], dtype=torch.bfloat16, device=device)
-        bfloat16_tensor = torch.arange(0, 4, dtype=torch.bfloat16, device=device)
-        self.assertEqual(ref_tensor, bfloat16_tensor)
+    @dtypes(torch.bfloat16, torch.float16)
+    def test_arange_lowp(self, device, dtype):
+        ref_tensor = torch.tensor([0, 1, 2, 3], dtype=dtype, device=device)
+        f16_tensor = torch.arange(0, 4, dtype=dtype, device=device)
+        self.assertEqual(ref_tensor, f16_tensor)
 
         # step=2
-        ref_tensor = torch.tensor([0, 2, 4], dtype=torch.bfloat16, device=device)
-        bfloat16_tensor = torch.arange(0, 6, step=2, dtype=torch.bfloat16, device=device)
-        self.assertEqual(ref_tensor, bfloat16_tensor)
+        ref_tensor = torch.tensor([0, 2, 4], dtype=dtype, device=device)
+        f16_tensor = torch.arange(0, 6, step=2, dtype=dtype, device=device)
+        self.assertEqual(ref_tensor, f16_tensor)
+
+    @dtypes(torch.bfloat16, torch.float16)
+    def test_range_lowp(self, device, dtype):
+        ref_tensor = torch.tensor([0, 1, 2, 3, 4], dtype=dtype, device=device)
+        f16_tensor = torch.range(0, 4, dtype=dtype, device=device)
+        self.assertEqual(ref_tensor, f16_tensor)
+
+        # step=2
+        ref_tensor = torch.tensor([0, 2, 4, 6], dtype=dtype, device=device)
+        f16_tensor = torch.range(0, 6, step=2, dtype=dtype, device=device)
+        self.assertEqual(ref_tensor, f16_tensor)
 
     @dtypes(*all_types_and_complex_and(torch.bfloat16))
     @dtypesIfCUDA(*all_types_and_complex_and(torch.bfloat16))
