@@ -8,7 +8,7 @@ from .triton import TritonKernel
 from .triton_utils import config_of, signature_to_meta, signature_of
 
 
-from typing import List, Any
+from typing import List
 
 class ForeachKernel(Kernel):
     MAX_NUM_ARGS = 250  # number where I would no longer get triton errors
@@ -21,7 +21,7 @@ class ForeachKernel(Kernel):
 
         cur_count = 0
         partitions = []
-        cur_partition: List[Any] = []
+        cur_partition: List[List] = []
         for node in nodes:
             read_writes = node.read_writes
             read_write_count = len(read_writes.reads) + len(read_writes.writes)
